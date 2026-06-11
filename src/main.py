@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -31,19 +31,25 @@ def list_search_queries(db: Session = Depends(get_db)):
 
 @app.get("/search-queries/{query_id}", response_model=SearchQueryOut)
 def get_search_query(query_id: int, db: Session = Depends(get_db)):
-    return sq.get_query(db, query_id)
+    query = sq.get_query(db, query_id)
+    if not query:
+        raise HTTPException(404, "Search query not found")
+    return query
 
 
 @app.post("/search-queries/{query_id}/toggle")
 def toggle_search_query(query_id: int, db: Session = Depends(get_db)):
     query = sq.toggle_query(db, query_id)
-    return {"active": query.is_active if query else False}
+    if not query:
+        raise HTTPException(404, "Search query not found")
+    return {"active": query.is_active}
 
 
 @app.delete("/search-queries/{query_id}")
 def delete_search_query(query_id: int, db: Session = Depends(get_db)):
-    ok = sq.delete_query(db, query_id)
-    return {"ok": ok}
+    if not sq.delete_query(db, query_id):
+        raise HTTPException(404, "Search query not found")
+    return {"ok": True}
 
 
 @app.post("/scrape")

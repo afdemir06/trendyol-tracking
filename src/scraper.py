@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 from typing import Optional
@@ -29,6 +30,8 @@ def scrape_trendyol(keyword: str, min_price: Optional[float] = None, max_price: 
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     )
+
+    logger = logging.getLogger(__name__)
 
     remote_url = os.environ.get("SELENIUM_REMOTE_URL")
     if remote_url:
@@ -89,7 +92,7 @@ def scrape_trendyol(keyword: str, min_price: Optional[float] = None, max_price: 
             time.sleep(2)
 
     except TimeoutException:
-        print(f"Timeout while scraping '{keyword}'")
+        logger.error("Timeout while scraping '%s'", keyword)
     finally:
         driver.quit()
 

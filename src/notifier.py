@@ -1,3 +1,4 @@
+import logging
 import os
 import smtplib
 from email.mime.text import MIMEText
@@ -5,6 +6,9 @@ from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+logger = logging.getLogger(__name__)
 
 
 def send_price_alert(products_with_changes: list[dict]) -> bool:
@@ -15,7 +19,7 @@ def send_price_alert(products_with_changes: list[dict]) -> bool:
     to_email = os.getenv("TO_EMAIL")
 
     if not all([email_address, email_password, to_email]):
-        print("Email settings incomplete. Set SMTP_SERVER, SMTP_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD, TO_EMAIL in .env")
+        logger.warning("Email settings incomplete. Set SMTP_SERVER, SMTP_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD, TO_EMAIL in .env")
         return False
 
     subject = "Trendyol Price Tracker - Price Changes Detected"
@@ -41,8 +45,8 @@ def send_price_alert(products_with_changes: list[dict]) -> bool:
             server.starttls()
             server.login(email_address, email_password)
             server.send_message(msg)
-        print(f"Price alert email sent to {to_email}")
+        logger.info("Price alert email sent to %s", to_email)
         return True
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        logger.error("Failed to send email: %s", e)
         return False
