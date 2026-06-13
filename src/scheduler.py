@@ -1,5 +1,4 @@
 import datetime
-import logging
 import os
 import schedule
 import time
@@ -14,18 +13,13 @@ from src.queries.product_queries import (
 )
 from src.scraper import scrape_trendyol
 from src.notifier import send_price_alert
+from src.decorators import log_call
 
 os.makedirs("logs", exist_ok=True)
-logging.basicConfig(
-    filename="logs/scheduler.log",
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
-logger = logging.getLogger(__name__)
 
 
+@log_call
 def run_daily_check():
-    logger.info("Starting daily price check...")
     db = SessionLocal()
 
     try:
@@ -41,8 +35,7 @@ def run_daily_check():
                 query = future_map[future]
                 try:
                     scraped = future.result()
-                except Exception as e:
-                    logger.error("Error scraping '%s': %s", query.keyword, e)
+                except Exception:
                     continue
 
                 for item in scraped:
@@ -76,23 +69,19 @@ def run_daily_check():
 
                 db.commit()
 
-        if changes:
-            send_price_alert(changes)
-        else:
-            logger.info("No price changes detected.")
+        if not changes:
+            return
 
-    except Exception as e:
-        logger.error("Error during daily check: %s", e)
+        send_price_alert(changes)
+    except Exception:
         db.rollback()
+        raise
     finally:
         db.close()
-
-    logger.info("Daily check finished.")
 
 
 def start_scheduler():
     schedule.every().day.at("09:00").do(run_daily_check)
-    logger.info("Scheduler started. Will run daily at 09:00.")
 
     while True:
         schedule.run_pending()

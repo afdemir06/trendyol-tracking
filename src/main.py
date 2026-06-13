@@ -8,6 +8,7 @@ from src.schemas import SearchQueryCreate, SearchQueryOut, ProductOut, PriceHist
 from src.scraper import scrape_trendyol
 from src.scheduler import run_daily_check
 from src.queries import search_queries as sq, product_queries as pq
+from src.decorators import log_call
 
 
 @asynccontextmanager
@@ -20,16 +21,19 @@ app = FastAPI(title="Trendyol Price Tracker", lifespan=lifespan)
 
 
 @app.post("/search-queries", response_model=SearchQueryOut)
+@log_call
 def create_search_query(data: SearchQueryCreate, db: Session = Depends(get_db)):
     return sq.create_query(db, data)
 
 
 @app.get("/search-queries", response_model=list[SearchQueryOut])
+@log_call
 def list_search_queries(db: Session = Depends(get_db)):
     return sq.get_all_queries(db)
 
 
 @app.get("/search-queries/{query_id}", response_model=SearchQueryOut)
+@log_call
 def get_search_query(query_id: int, db: Session = Depends(get_db)):
     query = sq.get_query(db, query_id)
     if not query:
@@ -38,6 +42,7 @@ def get_search_query(query_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/search-queries/{query_id}/toggle")
+@log_call
 def toggle_search_query(query_id: int, db: Session = Depends(get_db)):
     query = sq.toggle_query(db, query_id)
     if not query:
@@ -46,6 +51,7 @@ def toggle_search_query(query_id: int, db: Session = Depends(get_db)):
 
 
 @app.delete("/search-queries/{query_id}")
+@log_call
 def delete_search_query(query_id: int, db: Session = Depends(get_db)):
     if not sq.delete_query(db, query_id):
         raise HTTPException(404, "Search query not found")
@@ -53,6 +59,7 @@ def delete_search_query(query_id: int, db: Session = Depends(get_db)):
 
 
 @app.post("/scrape")
+@log_call
 def scrape_now(
     keyword: str = Query(...),
     min_price: Optional[float] = None,
@@ -63,16 +70,19 @@ def scrape_now(
 
 
 @app.post("/run-daily-check")
+@log_call
 def trigger_daily_check():
     run_daily_check()
     return {"ok": True}
 
 
 @app.get("/products", response_model=list[ProductOut])
+@log_call
 def list_products(query_id: Optional[int] = None, db: Session = Depends(get_db)):
     return pq.get_products(db, query_id)
 
 
 @app.get("/products/{product_id}/history", response_model=list[PriceHistoryOut])
+@log_call
 def product_price_history(product_id: int, db: Session = Depends(get_db)):
     return pq.get_price_history(db, product_id)

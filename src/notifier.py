@@ -1,16 +1,15 @@
-import logging
 import os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 
+from src.decorators import log_call
+
 load_dotenv()
 
 
-logger = logging.getLogger(__name__)
-
-
+@log_call
 def send_price_alert(products_with_changes: list[dict]) -> bool:
     smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
@@ -19,7 +18,6 @@ def send_price_alert(products_with_changes: list[dict]) -> bool:
     to_email = os.getenv("TO_EMAIL")
 
     if not all([email_address, email_password, to_email]):
-        logger.warning("Email settings incomplete. Set SMTP_SERVER, SMTP_PORT, EMAIL_ADDRESS, EMAIL_PASSWORD, TO_EMAIL in .env")
         return False
 
     subject = "Trendyol Price Tracker - Price Changes Detected"
@@ -40,13 +38,8 @@ def send_price_alert(products_with_changes: list[dict]) -> bool:
     msg["Subject"] = subject
     msg.attach(MIMEText(body, "plain"))
 
-    try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(email_address, email_password)
-            server.send_message(msg)
-        logger.info("Price alert email sent to %s", to_email)
-        return True
-    except Exception as e:
-        logger.error("Failed to send email: %s", e)
-        return False
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(email_address, email_password)
+        server.send_message(msg)
+    return True

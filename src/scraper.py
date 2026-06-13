@@ -1,4 +1,3 @@
-import logging
 import os
 import time
 from typing import Optional
@@ -8,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException, WebDriverException
+
+from src.decorators import log_call
 
 
 def extract_price(text: str) -> Optional[float]:
@@ -19,9 +20,8 @@ def extract_price(text: str) -> Optional[float]:
         return None
 
 
+@log_call
 def scrape_trendyol(keyword: str, min_price: Optional[float] = None, max_price: Optional[float] = None):
-    logger = logging.getLogger(__name__)
-
     options = webdriver.ChromeOptions()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
@@ -41,8 +41,7 @@ def scrape_trendyol(keyword: str, min_price: Optional[float] = None, max_price: 
             driver = webdriver.Remote(command_executor=remote_url, options=options)
         else:
             driver = webdriver.Chrome(options=options)
-    except WebDriverException as e:
-        logger.error("Failed to launch browser: %s", e)
+    except WebDriverException:
         return []
 
     driver.set_page_load_timeout(30)
@@ -100,9 +99,9 @@ def scrape_trendyol(keyword: str, min_price: Optional[float] = None, max_price: 
             time.sleep(1)
 
     except TimeoutException:
-        logger.error("Timeout while scraping '%s'", keyword)
-    except WebDriverException as e:
-        logger.error("Browser error while scraping '%s': %s", keyword, e)
+        pass
+    except WebDriverException:
+        pass
     finally:
         driver.quit()
 
