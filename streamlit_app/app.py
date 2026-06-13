@@ -9,40 +9,283 @@ st.set_page_config(page_title="Trendyol Price Tracker", page_icon="🏷️", lay
 
 st.markdown("""
 <style>
-    .main > div { padding: 1.5rem 2rem; }
-    .stTabs [data-baseweb="tab-list"] { gap: 8px; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    /* ── Base & Background ── */
+    html, body, [data-testid="stAppViewContainer"] {
+        background-color: #0d1117 !important;
+        color: #e6edf3 !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    [data-testid="stSidebar"], section[data-testid="stSidebar"] {
+        background-color: #161b22 !important;
+    }
+    .main > div {
+        padding: 2rem 2.5rem;
+    }
+
+    /* ── Typography ── */
+    h1 { 
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1.75rem !important;
+        font-weight: 700 !important;
+        color: #e6edf3 !important;
+        letter-spacing: -0.5px;
+        margin-bottom: 0.25rem !important;
+    }
+    h2 {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: #8b949e !important;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 1.25rem !important;
+    }
+    h3 {
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        color: #c9d1d9 !important;
+    }
+    p, label, div {
+        color: #c9d1d9 !important;
+    }
+
+    /* ── Tabs ── */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        background: #161b22;
+        padding: 6px;
+        border-radius: 10px;
+        border: 1px solid #30363d;
+        margin-bottom: 1.75rem;
+    }
     .stTabs [data-baseweb="tab"] {
-        border-radius: 6px 6px 0 0;
-        padding: 8px 20px;
+        border-radius: 7px;
+        padding: 8px 22px;
         font-weight: 600;
+        font-size: 0.85rem;
+        color: #8b949e !important;
+        background: transparent !important;
+        border: none !important;
+        transition: all 0.15s ease;
     }
     .stTabs [aria-selected="true"] {
-        background-color: #ff6b35 !important;
-        color: white !important;
+        background-color: #FF6000 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(255, 96, 0, 0.35);
     }
-    div[data-testid="stForm"] { background: #f8f9fa; padding: 1.5rem; border-radius: 10px; border: 1px solid #e9ecef; }
+    .stTabs [data-baseweb="tab-highlight"] {
+        display: none !important;
+    }
+    .stTabs [data-baseweb="tab-border"] {
+        display: none !important;
+    }
+
+    /* ── Form Card ── */
+    div[data-testid="stForm"] {
+        background: #161b22 !important;
+        padding: 1.75rem !important;
+        border-radius: 12px !important;
+        border: 1px solid #30363d !important;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.35);
+        margin-bottom: 1.5rem;
+    }
+
+    /* ── Inputs ── */
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input {
+        background-color: #0d1117 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+        color: #e6edf3 !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.875rem !important;
+        padding: 10px 14px !important;
+        transition: border-color 0.15s ease;
+    }
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus {
+        border-color: #FF6000 !important;
+        box-shadow: 0 0 0 3px rgba(255, 96, 0, 0.15) !important;
+    }
+    .stTextInput > div > div > input::placeholder {
+        color: #484f58 !important;
+    }
+
+    /* ── Labels ── */
+    .stTextInput label, .stNumberInput label {
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        color: #8b949e !important;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+    }
+
+    /* ── Buttons ── */
     .stButton > button {
-        background-color: #ff6b35;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
+        background: linear-gradient(135deg, #FF6000 0%, #e55200 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        padding: 10px 20px !important;
+        letter-spacing: 0.2px;
+        transition: all 0.15s ease !important;
+        box-shadow: 0 2px 8px rgba(255, 96, 0, 0.25);
     }
-    .stButton > button:hover { background-color: #e55a2b !important; color: white !important; }
-    .st-emotion-cache-1q7spjk { border: 1px solid #e9ecef; border-radius: 8px; }
-    h1, h2, h3 { color: #212529; }
-    .stSuccess { background-color: #d4edda; color: #155724; border-radius: 6px; }
-    .stInfo { background-color: #d1ecf1; color: #0c5460; border-radius: 6px; }
-    .stError { background-color: #f8d7da; color: #721c24; border-radius: 6px; }
-    .stDataFrame { border: 1px solid #dee2e6; border-radius: 8px; }
-    [data-testid="column"] { background: white; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #e9ecef; margin-bottom: 4px; }
-    .stExpander { border: 1px solid #e9ecef; border-radius: 8px; margin-top: 8px; }
-    footer { display: none; }
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #ff7519 0%, #FF6000 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 16px rgba(255, 96, 0, 0.4) !important;
+        transform: translateY(-1px);
+    }
+    .stButton > button:active {
+        transform: translateY(0px) !important;
+    }
+
+    /* ── DataFrames ── */
+    .stDataFrame {
+        border: 1px solid #30363d !important;
+        border-radius: 10px !important;
+        overflow: hidden;
+    }
+    .stDataFrame [data-testid="stDataFrameResizable"] {
+        background: #161b22 !important;
+    }
+    iframe[title="dataframe"] {
+        border-radius: 10px;
+    }
+
+    /* ── Alerts ── */
+    .stSuccess, div[data-testid="stAlert"][kind="success"] {
+        background-color: #0d2818 !important;
+        border: 1px solid #2ea043 !important;
+        border-radius: 8px !important;
+        color: #3fb950 !important;
+    }
+    .stInfo, div[data-testid="stAlert"][kind="info"] {
+        background-color: #0c1d2e !important;
+        border: 1px solid #1f6feb !important;
+        border-radius: 8px !important;
+        color: #58a6ff !important;
+    }
+    .stError, div[data-testid="stAlert"][kind="error"] {
+        background-color: #2d0f0f !important;
+        border: 1px solid #f85149 !important;
+        border-radius: 8px !important;
+        color: #f85149 !important;
+    }
+
+    /* ── Query Row Cards ── */
+    [data-testid="column"] {
+        background: #161b22 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        margin-bottom: 6px !important;
+    }
+
+    /* ── Expander ── */
+    .stExpander {
+        background: #161b22 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 10px !important;
+        margin-top: 12px !important;
+    }
+    .stExpander summary {
+        font-weight: 600 !important;
+        color: #c9d1d9 !important;
+        font-size: 0.9rem !important;
+    }
+    .stExpander summary:hover {
+        color: #FF6000 !important;
+    }
+
+    /* ── Spinner ── */
+    .stSpinner > div {
+        border-top-color: #FF6000 !important;
+    }
+
+    /* ── Divider ── */
+    hr {
+        border-color: #30363d !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    /* ── Subheader ── */
+    .stSubheader, [data-testid="stHeadingWithActionElements"] h3 {
+        color: #8b949e !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.6px !important;
+    }
+
+    /* ── Markdown bold/code inside columns ── */
+    strong { color: #e6edf3 !important; font-weight: 600; }
+    code {
+        background: #30363d !important;
+        color: #79c0ff !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 0.78rem !important;
+        border-radius: 4px !important;
+        padding: 2px 6px !important;
+    }
+
+    /* ── Line chart ── */
+    .stVegaLiteChart, [data-testid="stArrowVegaLiteChart"] {
+        background: #0d1117 !important;
+        border-radius: 8px !important;
+    }
+
+    /* ── Number input arrows ── */
+    .stNumberInput button {
+        background: #30363d !important;
+        border-color: #30363d !important;
+        color: #e6edf3 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+    .stNumberInput button:hover {
+        background: #FF6000 !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* ── Hide Streamlit chrome ── */
+    footer { display: none !important; }
+    #MainMenu { display: none !important; }
+    header[data-testid="stHeader"] { background: transparent !important; }
+
+    /* ── Container wrapper for scrape section ── */
+    [data-testid="stVerticalBlock"] > [data-testid="element-container"] > div[data-testid="stHorizontalBlock"] {
+        gap: 12px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🏷️ Trendyol Price Tracker")
-st.markdown("Monitor product prices from Trendyol and get notified on changes.")
+# ── Header ──────────────────────────────────────────────────────────────────
+col_title, col_badge = st.columns([6, 1])
+with col_title:
+    st.title("🏷️ Trendyol Price Tracker")
+    st.markdown(
+        "<p style='color:#8b949e; margin-top:-8px; font-size:0.9rem;'>"
+        "Monitor product prices from Trendyol and get notified on changes."
+        "</p>",
+        unsafe_allow_html=True,
+    )
+with col_badge:
+    st.markdown(
+        "<div style='text-align:right; padding-top:12px;'>"
+        "<span style='background:#161b22; border:1px solid #30363d; border-radius:20px;"
+        " padding:5px 12px; font-size:0.75rem; color:#8b949e; font-weight:600;'>"
+        "🟢 Live</span></div>",
+        unsafe_allow_html=True,
+    )
+
+st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
 
 tab1, tab2, tab3 = st.tabs(["🔍 Search Queries", "📦 Products", "🔄 Scrape"])
 
